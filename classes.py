@@ -107,5 +107,26 @@ class FeedForwardNN(nn.Module):
     
   def forward(self,cont_data,cat_data):
     if self.no_of_embs!=0:
-      x = [emb_layer(cat_data)]
+      #Wakanda shit is this?
+      x = [emb_layer(cat_data[:,i])
+          for i,emb_layer in enumerate(self.emb_layers)]
+      x=torch.cat(x,1)
+      x=self.emb_dropout_layer(x)
+      
+      if self.no_of_cont!=0:
+        normalized_cont_data=self.first_bn_layer(cont_data)
+        
+        if self.no_of_embs!=0:
+          x=torch.cat([x,normalized_cont_data],1)
+        else:
+          x=normalized_cont_data
+      for lin_layer, dropout_layer, bn_layer in zip(self.lin_layers, self.droput_layers, self.bn_layers):
+      
+        x = F.relu(lin_layer(x))
+        x = bn_layer(x)
+        x = dropout_layer(x)
+
+    x = self.output_layer(x)
+
+    return x
 
