@@ -1,0 +1,2 @@
+# Stroke-Prediction-
+Using Pytorch
